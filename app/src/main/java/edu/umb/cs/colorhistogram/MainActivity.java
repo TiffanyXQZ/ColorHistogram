@@ -22,7 +22,15 @@ import android.widget.Toast;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+import javax.crypto.AEADBadTagException;
+
+import info.debatty.java.lsh.LSHMinHash;
+import info.debatty.java.lsh.MinHash;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -34,7 +42,19 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+        LSHMinHash lsh = new LSHMinHash(20,20,0xffffff);
+//        System.out.printf("signature size is %g", lsh.)
+
+
+
+
+
         Field[] drawablesFields = R.drawable.class.getFields();
+
+
+
+        List<int[]> hashes = new ArrayList<>();
 
         for (int i=0;i< drawablesFields.length;i++) {
             Field field=drawablesFields[i];
@@ -47,7 +67,21 @@ public class MainActivity extends AppCompatActivity {
                     /*crop white borders */
                     CropMiddleFirstPixelTransformation ct=new CropMiddleFirstPixelTransformation();
 
-                    img_list.add(new ImageData(ct.transform(bmp),i));
+
+                    Bitmap bitmap = ct.transform(bmp);
+                    ImageData imageData =new ImageData(bitmap,i);
+                    hashes.add(lsh.hashSignature(imageData.getOrig_pixels()));
+
+                    System.out.printf("\nhash value is: ");
+                    for (int val : hashes.get(i)){
+                            System.out.printf("%d,",val);
+                    }
+
+                    img_list.add(new ImageData(bitmap,i));
+
+
+
+
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -55,12 +89,37 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
+        System.out.println(img_list.get(0).getOrig_pixels());
 
-        adapt = new MyAdapter(this, R.layout.image_item, img_list);
-        ListView listTask = (ListView) findViewById(R.id.listview);
-        listTask.setAdapter(adapt);
+        MinHash minHash = new MinHash(0.1,128);
+        Set<Integer> set1 = new HashSet<>();
+        for (int t : img_list.get(0).getOrig_pixels())
+            set1.add(t);
+        Set<Integer> set2 = new HashSet<>();
+        for (int t : img_list.get(1).getOrig_pixels())
+            set2.add(t);
 
-        cal_update();
+//        System.out.printf("the two images been compared are %s and %s", img_list.get(0).g)
+        System.out.printf("the lenght of set1 and set2 are %d and %d\n ", set1.size(),set2.size());
+
+
+        long startTime = System.nanoTime();
+        int[] sig1 = minHash.signature(set1);
+        long time = System.nanoTime() -startTime;
+        System.out.println("time for getting signature is: " + time/1000000 + "milliseconds");
+
+        int[] sig2 = minHash.signature(set2);
+        System.out.println("Signature similarity: " + minHash.similarity(sig1, sig2));
+        System.out.println("Real similarity (Jaccard index)" +
+                MinHash.jaccardIndex(set1, set2));
+
+
+
+//        adapt = new MyAdapter(this, R.layout.image_item, img_list);
+//        ListView listTask = (ListView) findViewById(R.id.listview);
+//        listTask.setAdapter(adapt);
+//
+//        cal_update();
     }
 
     void cal_update(){

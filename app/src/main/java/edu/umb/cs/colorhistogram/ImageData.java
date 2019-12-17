@@ -1,14 +1,23 @@
 package edu.umb.cs.colorhistogram;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.util.ArrayMap;
 
+import java.io.File;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class ImageData {
     private Bitmap bitmap=null;
+    protected int[] getOrig_pixels() {
+        return orig_pixels;
+    }
+
+
     private int[] orig_pixels;
     private int[] bin_idx;
     private int[] bin_hist;
@@ -47,6 +56,9 @@ public class ImageData {
     }
 
     protected Bitmap getBitmap(){return bitmap;}
+
+
+
 
     void calHist(int num){
         int w=(int)Math.ceil((float)256/num);
@@ -104,4 +116,24 @@ public class ImageData {
         }
         return ret;
     }
+
+    public static void main(String[] args) {
+        Field[] drawablesFields = R.drawable.class.getFields();
+        Field field=drawablesFields[1];
+        System.out.printf("images number,"+field.getName());
+
+
+        Bitmap bmp = BitmapFactory.decodeFile("res/drawable/a01.jpg");
+
+
+        System.out.printf("\n,"+bmp.getHeight());
+
+//        try {
+//            System.out.printf("images number,"+field.getInt(null));
+////            Bitmap bmp= BitmapFactory.decodeResource(getResources(), field.getInt(null));
+//        } catch (IllegalAccessException e) {
+//            e.printStackTrace();
+//        }
+    }
+
 }
