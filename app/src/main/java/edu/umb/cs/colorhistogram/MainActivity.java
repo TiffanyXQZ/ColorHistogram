@@ -41,45 +41,64 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        int index=0;
+        int num=10;//num: number of buckets for RGB to integers.
 
 
-        LSHMinHash lsh = new LSHMinHash(20,20,0xffffff);
-//        System.out.printf("signature size is %g", lsh.)
+//     Create minhash to calculte the minhash of images in folder "res-drawable"
+//     a3160402803.jpg is the original image to be compared by other images
+//     a111111, a222222, a333333, a444444, a555555, a666666, a777777, a888888, a999999 are the modified images from a316402803 (change brightness)
+//     a5042835581.jpg is the complete different image from the a3160402803
 
 
-
-
+//     We set the parameters for minhash:
+//     size: number of minhash signatures we want to calculate
+//     dict_size: 10x10x10, the number of the hashed RGB integers, originally was 256x256x256
+        MinHash minhash = new MinHash(1000,num*num*num);
 
         Field[] drawablesFields = R.drawable.class.getFields();
-
-
-
         List<int[]> hashes = new ArrayList<>();
-
+        List<Set> imageSets = new ArrayList<>();// for calculating real jaccard similarity
         for (int i=0;i< drawablesFields.length;i++) {
             Field field=drawablesFields[i];
+
+            field.getName().matches("a[0-9]+");
             try {
-                if(field.getName().startsWith("a")){
+                if(field.getName().matches("a[0-9]+")){
                     Drawable img=getResources().getDrawable(field.getInt(null));
 
                     Bitmap bmp= BitmapFactory.decodeResource(getResources(), field.getInt(null));
+
+//                    System.out.println(field.getName());
+
+                    Bitmap copyBitmap=Bitmap.createBitmap(bmp.getWidth(), bmp.getHeight(), bmp.getConfig());
 
                     /*crop white borders */
                     CropMiddleFirstPixelTransformation ct=new CropMiddleFirstPixelTransformation();
 
 
                     Bitmap bitmap = ct.transform(bmp);
-                    ImageData imageData =new ImageData(bitmap,i);
-                    hashes.add(lsh.hashSignature(imageData.getOrig_pixels()));
+                    ImageData imageData =new ImageData(bitmap,i,field.getName());
 
-                    System.out.printf("\nhash value is: ");
-                    for (int val : hashes.get(i)){
-                            System.out.printf("%d,",val);
+
+//     change RGB to an integer, and merge the 0-255 into num = 10 buckets, 256x256x256 to 10x10x10
+                    int[] imageRGB_Hash = imageData.getPixels_Hash(num);
+
+//     Below is calculating minhash signatures (minhash values) of this image
+                    Set<Integer> set = new HashSet<>();
+                    for (int t : imageRGB_Hash)
+                        set.add(t);
+                    imageSets.add(set);
+                    int[] minHash = minhash.signature(set);//this minHash is the minhash value of this image
+                    imageData.setMinhash(minHash);
+                    hashes.add(minHash);
+
+                    System.out.printf("\nMinhash value of image of " + field.getName()+ " is: "+imageData.getMinHashString());
+                    img_list.add(new ImageData(bitmap,i,field.getName()));
+
+                    if (field.getName()=="a3160402803"){
+                        index = i;
                     }
-
-                    img_list.add(new ImageData(bitmap,i));
-
-
 
 
                 }
@@ -87,39 +106,39 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
-
-
-        System.out.println(img_list.get(0).getOrig_pixels());
-
-        MinHash minHash = new MinHash(0.1,128);
-        Set<Integer> set1 = new HashSet<>();
-        for (int t : img_list.get(0).getOrig_pixels())
-            set1.add(t);
-        Set<Integer> set2 = new HashSet<>();
-        for (int t : img_list.get(1).getOrig_pixels())
-            set2.add(t);
-
-//        System.out.printf("the two images been compared are %s and %s", img_list.get(0).g)
-        System.out.printf("the lenght of set1 and set2 are %d and %d\n ", set1.size(),set2.size());
-
-
-        long startTime = System.nanoTime();
-        int[] sig1 = minHash.signature(set1);
-        long time = System.nanoTime() -startTime;
-        System.out.println("time for getting signature is: " + time/1000000 + "milliseconds");
-
-        int[] sig2 = minHash.signature(set2);
-        System.out.println("Signature similarity: " + minHash.similarity(sig1, sig2));
-        System.out.println("Real similarity (Jaccard index)" +
-                MinHash.jaccardIndex(set1, set2));
-
-
-
-//        adapt = new MyAdapter(this, R.layout.image_item, img_list);
-//        ListView listTask = (ListView) findViewById(R.id.listview);
-//        listTask.setAdapter(adapt);
 //
-//        cal_update();
+        long startTime = System.nanoTime();
+        for (int i=0;i< hashes.size();i++) {
+            minhash.similarity(hashes.get(index),hashes.get(i));
+        }
+        long endTime = System.nanoTime();
+        long duration = (endTime - startTime);
+        System.out.printf("\nThe average time used for calculating minhash similarity is: %d nanoseconds \n", duration/hashes.size());
+
+
+        startTime = System.nanoTime();
+        for (int i=0;i< hashes.size();i++) {
+            minhash.jaccardIndex(imageSets.get(index),imageSets.get(i));
+        }
+        endTime = System.nanoTime();
+        duration = (endTime - startTime);
+        System.out.printf("\nThe average time used for calculating Jaccard similarity is: %d nanoseconds\n", duration/hashes.size());
+
+
+
+
+//     Print minhash and real similarity between each image to a3160402803.jpg
+        for (int i=0;i< hashes.size();i++) {
+            System.out.printf("Minhash similarity and real Jaccad similarity of " + img_list.get(i).getImage_name()
+                    +" to a3160402803 are: "+minhash.similarity(hashes.get(index),hashes.get(i)) + " and " + minhash.jaccardIndex(imageSets.get(index),imageSets.get(i)) + "\n");
+
+        }
+
+        adapt = new MyAdapter(this, R.layout.image_item, img_list);
+        ListView listTask = (ListView) findViewById(R.id.listview);
+        listTask.setAdapter(adapt);
+
+        cal_update();
     }
 
     void cal_update(){
@@ -180,8 +199,12 @@ public class MainActivity extends AppCompatActivity {
                 img.setBackgroundColor(Color.parseColor("#000000"));
 
                 TextView txv=convertView.findViewById(R.id.textView2);
+
+
                 txv.setText("Image "+Integer.toString(position)
-                        +"\n\n"+imgs.get(position).getTopNString(5));
+                        +"\n\n"+imgs.get(position).getTopNString(5)
+//                        +"\nMinHash:"+imgs.get(position).getMinHashString()
+                );
 
 
 
@@ -231,3 +254,40 @@ public class MainActivity extends AppCompatActivity {
         return Math.sqrt(sum);
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//        MinHash minHash = new MinHash(0.1,128);
+//        Set<Integer> set1 = new HashSet<>();
+//        for (int t : img_list.get(0).getOrig_pixels())
+//            set1.add(t);
+//        Set<Integer> set2 = new HashSet<>();
+//        for (int t : img_list.get(1).getOrig_pixels())
+//            set2.add(t);
+//
+////        System.out.printf("the two images been compared are %s and %s", img_list.get(0).g)
+//        System.out.printf("the lenght of set1 and set2 are %d and %d\n ", set1.size(),set2.size());
+
+
+//        long startTime = System.nanoTime();
+//        int[] sig1 = minHash.signature(set1);
+//        long time = System.nanoTime() -startTime;
+//        System.out.println("time for getting signature is: " + time/1000000 + "milliseconds");
+//
+//        int[] sig2 = minHash.signature(set2);
+//        System.out.println("Signature similarity: " + minHash.similarity(sig1, sig2));
+//        System.out.println("Real similarity (Jaccard index)" +
+//                MinHash.jaccardIndex(set1, set2));
