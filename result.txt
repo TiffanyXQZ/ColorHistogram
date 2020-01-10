@@ -1,0 +1,58 @@
+
+I/System.out: Number of pixels and distinct colors in image of a111111       are: 335195     and 334       
+I/System.out: Number of pixels and distinct colors in image of a1650052227   are: 223924     and 328       
+I/System.out: Number of pixels and distinct colors in image of a222222       are: 332416     and 338       
+I/System.out: Number of pixels and distinct colors in image of a3160402803   are: 314785     and 362       
+I/System.out: Number of pixels and distinct colors in image of a32420846530  are: 364240     and 288       
+I/System.out: Number of pixels and distinct colors in image of a333333       are: 336690     and 323       
+I/System.out: Number of pixels and distinct colors in image of a444444       are: 335195     and 278       
+I/System.out: Number of pixels and distinct colors in image of a5042835581   are: 364240     and 311       
+I/System.out: Number of pixels and distinct colors in image of a555555       are: 335195     and 366       
+I/System.out: Number of pixels and distinct colors in image of a666666       are: 333914     and 315       
+I/System.out: Number of pixels and distinct colors in image of a777777       are: 339905     and 215       
+I/System.out: Number of pixels and distinct colors in image of a87651420677  are: 427630     and 242       
+I/System.out: Number of pixels and distinct colors in image of a888888       are: 333914     and 321       
+I/System.out: Number of pixels and distinct colors in image of a894047001034 are: 334372     and 317       
+I/System.out: Number of pixels and distinct colors in image of a898440001028 are: 372875     and 191       
+I/System.out: Number of pixels and distinct colors in image of a999999       are: 333914     and 302       
+I/System.out: Time of rgb hashing and minhashing in image of a111111         are: 142608000  and 202657500  
+I/System.out: Time of rgb hashing and minhashing in image of a1650052227     are: 50629400   and 65342000   
+I/System.out: Time of rgb hashing and minhashing in image of a222222         are: 70079000   and 97770200   
+I/System.out: Time of rgb hashing and minhashing in image of a3160402803     are: 69544400   and 96332300   
+I/System.out: Time of rgb hashing and minhashing in image of a32420846530    are: 78079200   and 95983300   
+I/System.out: Time of rgb hashing and minhashing in image of a333333         are: 70933000   and 101222200  
+I/System.out: Time of rgb hashing and minhashing in image of a444444         are: 70692300   and 95095100   
+I/System.out: Time of rgb hashing and minhashing in image of a5042835581     are: 73112600   and 90092500   
+I/System.out: Time of rgb hashing and minhashing in image of a555555         are: 73594300   and 94500700   
+I/System.out: Time of rgb hashing and minhashing in image of a666666         are: 65862500   and 93237400   
+I/System.out: Time of rgb hashing and minhashing in image of a777777         are: 76055800   and 88619200   
+I/System.out: Time of rgb hashing and minhashing in image of a87651420677    are: 94842500   and 108604200  
+I/System.out: Time of rgb hashing and minhashing in image of a888888         are: 74211700   and 100153300  
+I/System.out: Time of rgb hashing and minhashing in image of a894047001034   are: 79921700   and 88078700   
+I/System.out: Time of rgb hashing and minhashing in image of a898440001028   are: 77719000   and 95417500   
+I/System.out: Time of rgb hashing and minhashing in image of a999999         are: 67363100   and 90477000 
+
+
+I/System.out: The average time used for calculating minhash similarity is: 99250 nanoseconds 
+I/System.out: The average time used for calculating Jaccard similarity is: 2032356 nanoseconds
+I/System.out: Minhash similarity and real Jaccad similarity of a111111       to a3160402803 are: 0.801 and 0.7984496124031008
+I/System.out: Minhash similarity and real Jaccad similarity of a1650052227   to a3160402803 are: 0.471 and 0.4967462039045553
+I/System.out: Minhash similarity and real Jaccad similarity of a222222       to a3160402803 are: 0.796 and 0.7994858611825193
+I/System.out: Minhash similarity and real Jaccad similarity of a3160402803   to a3160402803 are: 1.0   and 1.0
+I/System.out: Minhash similarity and real Jaccad similarity of a32420846530  to a3160402803 are: 0.245 and 0.2548262548262548
+I/System.out: Minhash similarity and real Jaccad similarity of a333333       to a3160402803 are: 0.685 and 0.7082294264339152
+I/System.out: Minhash similarity and real Jaccad similarity of a444444       to a3160402803 are: 0.697 and 0.6976127320954907
+I/System.out: Minhash similarity and real Jaccad similarity of a5042835581   to a3160402803 are: 0.401 and 0.41983122362869196
+I/System.out: Minhash similarity and real Jaccad similarity of a555555       to a3160402803 are: 0.801 and 0.801980198019802
+I/System.out: Minhash similarity and real Jaccad similarity of a666666       to a3160402803 are: 0.66  and 0.671604938271605
+I/System.out: Minhash similarity and real Jaccad similarity of a777777       to a3160402803 are: 0.498 and 0.5224274406332454
+I/System.out: Minhash similarity and real Jaccad similarity of a87651420677  to a3160402803 are: 0.368 and 0.391705069124424
+I/System.out: Minhash similarity and real Jaccad similarity of a888888       to a3160402803 are: 0.756 and 0.7648578811369509
+I/System.out: Minhash similarity and real Jaccad similarity of a894047001034 to a3160402803 are: 0.328 and 0.34189723320158105
+I/System.out: Minhash similarity and real Jaccad similarity of a898440001028 to a3160402803 are: 0.509 and 0.5068119891008175
+I/System.out: Minhash similarity and real Jaccad similarity of a999999       to a3160402803 are: 0.736 and 0.7473684210526316
+
+I/System.out: The Minhash Signature Lengths are: 
+I/System.out: 100,150,200,250,300,350,400,450,500,550,600,650,700,750,800,850,900,950,1000,1050,1100,1150,1200,1250,
+I/System.out: The corresponding average difference between Minhash Similarity VS. Real Jaccard Similarity are: 
+I/System.out: 0.036366,0.035146,0.026183,0.041402,0.021091,0.022166,0.020438,0.017773,0.015174,0.018045,0.023410,0.017735,0.018931,0.013268,0.010523,0.012099,0.013763,0.010701,0.009220,0.007988,0.014630,0.011374,0.019393,0.011330,
