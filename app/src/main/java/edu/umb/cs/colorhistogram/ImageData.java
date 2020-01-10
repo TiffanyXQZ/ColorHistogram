@@ -10,6 +10,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 
 public class ImageData {
@@ -20,6 +21,53 @@ public class ImageData {
     private int[] orig_pixels;
     private int[] bin_idx;
     private int[] bin_hist;
+
+
+    private int num_pixels;
+    private int num_color;
+    private long time_rgbhash;
+    private long time_minhash;
+    private Set<Integer> colorSet;
+
+    public Set<Integer> getColorSet() {
+        return colorSet;
+    }
+
+    public void setColorSet(Set<Integer> colorSet) {
+        this.colorSet = colorSet;
+    }
+
+    public int getNum_pixels() {
+        return num_pixels;
+    }
+
+    public void setNum_pixels(int num_pixels) {
+        this.num_pixels = num_pixels;
+    }
+
+    public int getNum_color() {
+        return num_color;
+    }
+
+    public void setNum_color(int num_color) {
+        this.num_color = num_color;
+    }
+
+    public long getTime_rgbhash() {
+        return time_rgbhash;
+    }
+
+    public void setTime_rgbhash(long time_rgbhash) {
+        this.time_rgbhash = time_rgbhash;
+    }
+
+    public long getTime_minhash() {
+        return time_minhash;
+    }
+
+    public void setTime_minhash(long time_minhash) {
+        this.time_minhash = time_minhash;
+    }
 
     public String getImage_name() {
         return image_name;
@@ -86,8 +134,7 @@ public class ImageData {
         protected double getDist(){return dist;}
     }
 
-    ImageData(Bitmap bmp, int idx, String name){
-        id=idx;
+    ImageData(Bitmap bmp, String name){
         bitmap=bmp;
         image_name = name;
         orig_pixels=readPixels(bitmap);
@@ -99,6 +146,8 @@ public class ImageData {
     protected int getNumOfPixels(){return orig_pixels.length;}
 
     private int[] readPixels (Bitmap bitmap){
+
+        this.setNum_pixels(bitmap.getWidth() * bitmap.getHeight());
         int[] pixels = new int[bitmap.getWidth() * bitmap.getHeight()];
         bitmap.getPixels(pixels, 0, bitmap.getWidth(), 0, 0,
                 bitmap.getWidth(), bitmap.getHeight());

@@ -6,7 +6,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -22,14 +21,10 @@ import android.widget.Toast;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.crypto.AEADBadTagException;
-
-import info.debatty.java.lsh.LSHMinHash;
 import info.debatty.java.lsh.MinHash;
 
 public class MainActivity extends AppCompatActivity {
@@ -57,8 +52,11 @@ public class MainActivity extends AppCompatActivity {
         MinHash minhash = new MinHash(1000,num*num*num);
 
         Field[] drawablesFields = R.drawable.class.getFields();
-        List<int[]> hashes = new ArrayList<>();
-        List<Set> imageSets = new ArrayList<>();// for calculating real jaccard similarity
+        long duration, startTime,endTime;
+        List<ImageData> imageDatas = new ArrayList<>();
+        List<ImageBitmaps> imageBitmaps = new ArrayList<>();
+
+
         for (int i=0;i< drawablesFields.length;i++) {
             Field field=drawablesFields[i];
 
@@ -66,35 +64,50 @@ public class MainActivity extends AppCompatActivity {
             try {
                 if(field.getName().matches("a[0-9]+")){
                     Drawable img=getResources().getDrawable(field.getInt(null));
-
                     Bitmap bmp= BitmapFactory.decodeResource(getResources(), field.getInt(null));
-
 //                    System.out.println(field.getName());
-
                     Bitmap copyBitmap=Bitmap.createBitmap(bmp.getWidth(), bmp.getHeight(), bmp.getConfig());
-
                     /*crop white borders */
                     CropMiddleFirstPixelTransformation ct=new CropMiddleFirstPixelTransformation();
 
 
                     Bitmap bitmap = ct.transform(bmp);
-                    ImageData imageData =new ImageData(bitmap,i,field.getName());
+                    imageBitmaps.add(new ImageBitmaps(field.getName(),bitmap));
+                    ImageData imageData =new ImageData(bitmap,field.getName());
 
 
 //     change RGB to an integer, and merge the 0-255 into num = 10 buckets, 256x256x256 to 10x10x10
+                    startTime = System.nanoTime();
                     int[] imageRGB_Hash = imageData.getPixels_Hash(num);
+                    endTime = System.nanoTime();
+                    duration = endTime - startTime;
+                    imageData.setTime_rgbhash(duration);
 
 //     Below is calculating minhash signatures (minhash values) of this image
+
+                    startTime = System.nanoTime();
                     Set<Integer> set = new HashSet<>();
                     for (int t : imageRGB_Hash)
                         set.add(t);
-                    imageSets.add(set);
                     int[] minHash = minhash.signature(set);//this minHash is the minhash value of this image
-                    imageData.setMinhash(minHash);
-                    hashes.add(minHash);
+                    endTime = System.nanoTime();
+                    duration = endTime - startTime;
 
-                    System.out.printf("\nMinhash value of image of " + field.getName()+ " is: "+imageData.getMinHashString());
-                    img_list.add(new ImageData(bitmap,i,field.getName()));
+                    imageData.setColorSet(set);
+                    imageData.setNum_color(set.size());
+                    imageData.setTime_minhash(duration);
+                    imageData.setMinhash(minHash);
+                    imageDatas.add(imageData);
+
+
+
+                    System.out.printf("\nMinhash value of image of " +
+                            field.getName()+ " is: "+imageData.getMinHashString());
+
+
+
+
+                    img_list.add(new ImageData(bitmap,field.getName()));
 
                     if (field.getName()=="a3160402803"){
                         index = i;
@@ -106,34 +119,79 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
-//
-        long startTime = System.nanoTime();
-        for (int i=0;i< hashes.size();i++) {
-            minhash.similarity(hashes.get(index),hashes.get(i));
+
+        for (ImageData imageData: imageDatas){
+            System.out.printf("\nNumber of pixels and distinct colors in image of %-13s are: %-10d and %-10d",
+                    imageData.getImage_name(),imageData.getNum_pixels(), imageData.getNum_color());
         }
-        long endTime = System.nanoTime();
-        long duration = (endTime - startTime);
-        System.out.printf("\nThe average time used for calculating minhash similarity is: %d nanoseconds \n", duration/hashes.size());
+
+        for (ImageData imageData: imageDatas){
+            System.out.printf("\nTime of rgb hashing and minhashing in image of %-15s are: %-10d and %-10d " ,
+                    imageData.getImage_name(), imageData.getTime_rgbhash(), imageData.getTime_minhash());
+        }
 
 
+// Time duration of MinHash Similarity calculation
         startTime = System.nanoTime();
-        for (int i=0;i< hashes.size();i++) {
-            minhash.jaccardIndex(imageSets.get(index),imageSets.get(i));
+        for (int i=0;i< imageDatas.size();i++) {
+            minhash.similarity(imageDatas.get(index).getMinhash(),imageDatas.get(i).getMinhash());
         }
         endTime = System.nanoTime();
         duration = (endTime - startTime);
-        System.out.printf("\nThe average time used for calculating Jaccard similarity is: %d nanoseconds\n", duration/hashes.size());
+        System.out.printf("\nThe average time used for calculating minhash similarity is: %d nanoseconds \n", duration/imageDatas.size());
 
-
+// Time duration of real jaccard similarity calcuation
+        startTime = System.nanoTime();
+        for (int i=0;i< imageDatas.size();i++) {
+            minhash.jaccardIndex(imageDatas.get(index).getColorSet(),imageDatas.get(i).getColorSet());
+        }
+        endTime = System.nanoTime();
+        duration = (endTime - startTime);
+        System.out.printf("\nThe average time used for calculating Jaccard similarity is: %d nanoseconds\n", duration/imageDatas.size());
 
 
 //     Print minhash and real similarity between each image to a3160402803.jpg
-        for (int i=0;i< hashes.size();i++) {
+        for (int i=0;i<imageDatas.size();i++) {
             System.out.printf("Minhash similarity and real Jaccad similarity of " + img_list.get(i).getImage_name()
-                    +" to a3160402803 are: "+minhash.similarity(hashes.get(index),hashes.get(i)) + " and " + minhash.jaccardIndex(imageSets.get(index),imageSets.get(i)) + "\n");
+                    +" to a3160402803 are: "+minhash.similarity(imageDatas.get(index).getMinhash(),
+                    imageDatas.get(i).getMinhash()) + " and " +
+                    minhash.jaccardIndex(imageDatas.get(index).getColorSet(),imageDatas.get(i).getColorSet()) + "\n");
 
         }
 
+
+// Below is trying to see how the difference between Minhash Similarity and Real Jaccard Similarity will trend
+// by increasing the length of minhash signatures/values
+        List<AverageDifferenceBySize> accs = new ArrayList<>();
+
+        List<Integer> sizes = new ArrayList<>();
+        List<Double> accVals = new ArrayList<>();
+        for (int size=100;size<=1250;size+=50){
+            AverageDifferenceBySize averageAccuracyBySize = new AverageDifferenceBySize(imageBitmaps,index,size,num);
+            accs.add(averageAccuracyBySize);
+            sizes.add(size);
+            accVals.add(averageAccuracyBySize.getDiff_average());
+
+        }
+        System.out.println("The Minhash Signature Lengths are: "); // size: Minhash Signature/values length
+        for (int i=0;i<sizes.size();i++){
+            System.out.printf("%d,",sizes.get(i));
+        }
+
+
+        //Average is taken by adding all difference between MinHash Similarity VS. Real Jaccard Similarity of
+        //all pairs of pictures comparison, then divide the sum by the number of pairs of comparison
+        System.out.println("\n The corresponding average difference between Minhash Similarity VS. Real Jaccard Similarity are: ");
+        for (int i=0;i<sizes.size();i++){
+            System.out.printf("%f,",Math.abs(accVals.get(i)));
+        }
+
+        System.out.println("");
+// End of the testing trend of difference between Minhash Similarity and Real Jaccard Similarity above.
+
+
+
+//All below coding is the listview coding by Professor
         adapt = new MyAdapter(this, R.layout.image_item, img_list);
         ListView listTask = (ListView) findViewById(R.id.listview);
         listTask.setAdapter(adapt);
