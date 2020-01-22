@@ -2,17 +2,12 @@ package edu.umb.cs.colorhistogram;
 
 import android.graphics.Bitmap;
 
+import lombok.Getter;
+
+
+@Getter
 public class ImageBitmaps{
     private String name;
-
-    public String getName() {
-        return name;
-    }
-
-    public Bitmap getBitmap() {
-        return bitmap;
-    }
-
     private Bitmap bitmap;
 
     public ImageBitmaps(String name, Bitmap bitmap) {
