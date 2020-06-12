@@ -335,16 +335,16 @@ public class MainActivity extends AppCompatActivity {
 //        }
 //    }
 
-    public double calEuclideanDistance(ImageData id1, ImageData id2){
-        int[] hist1=id1.getBinHist();
-        int[] hist2=id2.getBinHist();
-        int p1=id1.getNumOfPixels(), p2=id2.getNumOfPixels();
-        double sum=0;
-        for(int i=0;i<hist1.length;i++){
-            sum+=Math.pow(((double)hist1[i]/p1-(double)hist2[i]/p2),2);
-        }
-        return Math.sqrt(sum);
-    }
+//    public double calEuclideanDistance(ImageData id1, ImageData id2){
+//        int[] hist1=id1.getBinHist();
+//        int[] hist2=id2.getBinHist();
+//        int p1=id1.getNumOfPixels(), p2=id2.getNumOfPixels();
+//        double sum=0;
+//        for(int i=0;i<hist1.length;i++){
+//            sum+=Math.pow(((double)hist1[i]/p1-(double)hist2[i]/p2),2);
+//        }
+//        return Math.sqrt(sum);
+//    }
 }
 
 
